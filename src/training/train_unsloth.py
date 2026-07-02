@@ -170,6 +170,12 @@ def main() -> None:
         "max_seq_length": m_cfg["max_seq_length"],
         "dataset_text_field": "text",
         "packing": d_cfg["packing"],
+        # Some Unsloth-compiled SFTConfig wrappers add their own `eos_token` field with a
+        # placeholder default ("<EOS_TOKEN>") that's only overridden if explicitly passed in --
+        # repairing tokenizer.eos_token alone (above) does not reach this separate field, so we
+        # pass the real value through explicitly. Harmless no-op if this trl version doesn't
+        # recognize the field (the retry loop below just drops it).
+        "eos_token": tokenizer.eos_token,
     }
 
     def _build_sft_config(kwargs):
