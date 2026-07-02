@@ -1,0 +1,122 @@
+{
+  "tokenizer_used_for_stats": "cl100k_base (BPE proxy, upper bound for Hindi)",
+  "raw_object_count": 55,
+  "unique_conversation_count": 50,
+  "exact_duplicate_conversations_removed": 5,
+  "duplicate_pairs": [
+    {
+      "kept_index": 10,
+      "dropped_index": 35
+    },
+    {
+      "kept_index": 11,
+      "dropped_index": 36
+    },
+    {
+      "kept_index": 12,
+      "dropped_index": 37
+    },
+    {
+      "kept_index": 13,
+      "dropped_index": 38
+    },
+    {
+      "kept_index": 14,
+      "dropped_index": 39
+    }
+  ],
+  "schema_variants": {
+    "('messages',)": 35,
+    "('id', 'messages', 'tags')": 15
+  },
+  "validation_problems": [],
+  "role_message_counts": {
+    "system": 50,
+    "user": 62,
+    "assistant": 62
+  },
+  "conversation_length_distribution_num_messages": {
+    "3": 39,
+    "5": 10,
+    "7": 1
+  },
+  "conversation_length_messages_stats": {
+    "min": 3,
+    "max": 7,
+    "mean": 3.48,
+    "median": 3.0
+  },
+  "token_stats": {
+    "total_tokens": 34028,
+    "conversation_tokens": {
+      "min": 123,
+      "max": 2031,
+      "mean": 680.6,
+      "median": 474.5,
+      "p90": 1503,
+      "p95": 1672,
+      "p99": 2031
+    },
+    "system_prompt_tokens": {
+      "min": 23,
+      "max": 371,
+      "mean": 122.1
+    },
+    "user_message_tokens": {
+      "min": 9,
+      "max": 226,
+      "mean": 58.5
+    },
+    "assistant_message_tokens": {
+      "min": 80,
+      "max": 1119,
+      "mean": 391.9
+    }
+  },
+  "script_mix": {
+    "devanagari_chars": 17610,
+    "latin_chars": 33633,
+    "devanagari_ratio": 0.344
+  },
+  "tag_distribution": {
+    "hinglish": 6,
+    "hindi": 6,
+    "english": 3,
+    "relationships": 3,
+    "career": 2,
+    "lottery": 2,
+    "money": 2,
+    "fear": 2,
+    "safety": 2,
+    "marriage": 2,
+    "canada": 1,
+    "india": 1,
+    "black-magic": 1,
+    "government-job": 1,
+    "private-job": 1,
+    "death": 1,
+    "demanding-guarantee": 1,
+    "boundaries": 1,
+    "remedies": 1,
+    "scammed": 1,
+    "money-waste": 1,
+    "emotional-crisis": 1,
+    "breakup": 1,
+    "trust-boundary": 1,
+    "free-will": 1,
+    "health-boundary": 1,
+    "medical-concern": 1,
+    "puja-false-hope": 1,
+    "accident": 1,
+    "refusal": 1,
+    "emotional": 1,
+    "pregnancy": 1,
+    "health": 1,
+    "doctor-referral": 1,
+    "financial-safety": 1,
+    "skeptic": 1,
+    "conflicting-astrologers": 1,
+    "trust": 1
+  },
+  "duplicate_individual_messages": {}
+}

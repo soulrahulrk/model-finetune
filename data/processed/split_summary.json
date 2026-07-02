@@ -1,0 +1,22 @@
+{
+  "per_source": {
+    "clean_dataset.jsonl": {
+      "total": 50,
+      "val": 5,
+      "train": 45
+    },
+    "synthetic_astrology_100.jsonl": {
+      "total": 100,
+      "val": 10,
+      "train": 90
+    },
+    "manual_conversations.jsonl": {
+      "total": 5,
+      "val": 1,
+      "train": 4
+    }
+  },
+  "total_unique_conversations": 155,
+  "train_count": 139,
+  "val_count": 16
+}

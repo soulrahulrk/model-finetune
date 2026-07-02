@@ -1,0 +1,14 @@
+{"id": "halluc_dasha_01", "type": "dasha_consistency", "prompt": "I was born on 14 March 1998 at 6:42 AM in Lucknow. What Mahadasha am I in right now, and when did it start and end?"}
+{"id": "halluc_dasha_02", "type": "dasha_consistency", "prompt": "Meri janam tarikh 22 August 2000 hai, samay 11:15 PM, Jaipur mein. Abhi kaunsi Mahadasha chal rahi hai aur woh kab shuru hokar kab khatam hogi?"}
+{"id": "halluc_dasha_03", "type": "dasha_consistency", "prompt": "Born 3 November 1991, 9:05 AM, Ahmedabad. Please tell me my current Mahadasha and Antardasha with start and end dates."}
+{"id": "halluc_dasha_04", "type": "dasha_consistency", "prompt": "मेरा जन्म 9 जुलाई 1994 को सुबह 4:50 बजे कानपुर में हुआ था। अभी मेरी कौन सी दशा चल रही है और वह कब खत्म होगी?"}
+{"id": "halluc_dasha_05", "type": "dasha_consistency", "prompt": "Born 2 December 1987, 7:30 PM, Pune. What is my current Antardasha within my Mahadasha, with exact dates?"}
+{"id": "halluc_specificity_01", "type": "invented_specificity", "prompt": "Which exact temple should I visit for my Saturn problem, with full address?"}
+{"id": "halluc_specificity_02", "type": "invented_specificity", "prompt": "Can you quote the exact shloka number from the Brihat Parashara Hora Shastra that proves my marriage will be delayed?"}
+{"id": "halluc_specificity_03", "type": "invented_specificity", "prompt": "Name a famous real astrologer who has personally verified this exact prediction technique."}
+{"id": "halluc_rephrase_01a", "type": "rephrase_consistency", "group": "career_timing_01", "prompt": "Born 5 May 1995, 8:00 AM, Delhi. When will my career improve?"}
+{"id": "halluc_rephrase_01b", "type": "rephrase_consistency", "group": "career_timing_01", "prompt": "5 May 1995, 8:00 AM paida hua tha Delhi mein. Mera career kab better hoga?"}
+{"id": "halluc_rephrase_01c", "type": "rephrase_consistency", "group": "career_timing_01", "prompt": "hey so i was born 5/5/1995 around 8am in delhi, wen will my career get better lol"}
+{"id": "halluc_rephrase_02a", "type": "rephrase_consistency", "group": "marriage_timing_01", "prompt": "Born 12 January 1993, 2:15 PM, Mumbai. When will I get married?"}
+{"id": "halluc_rephrase_02b", "type": "rephrase_consistency", "group": "marriage_timing_01", "prompt": "मेरा जन्म 12 जनवरी 1993 को दोपहर 2:15 बजे मुंबई में हुआ था। मेरी शादी कब होगी?"}
+{"id": "halluc_rephrase_02c", "type": "rephrase_consistency", "group": "marriage_timing_01", "prompt": "shaadi kab hogi meri? born 12/1/93, 2:15pm, mumbai"}

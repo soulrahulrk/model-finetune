@@ -1,0 +1,52 @@
+# Requirements for fine-tuning, evaluating, and serving the Qwen3-8B Vedaz astrology model.
+#
+# INSTALL ORDER MATTERS. PyTorch and Unsloth must go in first, against a CUDA-matched index,
+# before the rest — installing everything in one flat `pip install -r requirements.txt` pass
+# can pull a CPU-only torch wheel or mismatch the CUDA ABI for bitsandbytes/flash-attn.
+#
+# Recommended install sequence (see docs/02_finetuning_strategy.md section 3 for full context):
+#
+#   1) python -m venv .venv && source .venv/bin/activate        # Python 3.11
+#   2) pip install --upgrade pip
+#   3) pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+#   4) pip install -r requirements.txt
+#   5) pip install flash-attn==2.7.4.post1 --no-build-isolation   # optional, needs matching CUDA toolkit
+#
+# ---- Core training stack ----
+unsloth @ git+https://github.com/unslothai/unsloth.git   # always track latest: day-0 Qwen3 kernels
+transformers==4.51.3
+peft==0.14.0
+trl==0.13.0
+bitsandbytes==0.45.0
+accelerate==1.2.1
+datasets==3.2.0
+sentencepiece==0.2.0
+tiktoken==0.8.0
+protobuf==4.25.5
+einops==0.8.0
+
+# ---- Config / CLI ----
+pyyaml==6.0.2
+tyro==0.9.5
+
+# ---- Experiment tracking (optional, config-gated) ----
+wandb==0.19.1
+
+# ---- GGUF export ----
+gguf==0.13.0
+
+# ---- Evaluation stack (Task 5) ----
+evaluate==0.4.3
+sacrebleu==2.4.3
+rouge-score==0.1.2
+bert-score==0.3.13
+nltk==3.9.1
+
+# ---- Serving / deployment (Task 2) ----
+vllm==0.7.1
+openai==1.58.1                # OpenAI-compatible client for testing the vLLM server
+
+# ---- Utilities ----
+numpy==1.26.4
+pandas==2.2.3
+tqdm==4.67.1

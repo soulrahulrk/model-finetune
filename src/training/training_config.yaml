@@ -1,0 +1,68 @@
+# Training configuration for QLoRA fine-tuning of Qwen3-8B on the Vedaz astrology chat dataset.
+# Every value here is explained and justified in ../../docs/02_finetuning_strategy.md section 5.
+# Loaded by train_unsloth.py via `--config training_config.yaml`; any value can be overridden
+# with a matching CLI flag, e.g. `--num_train_epochs 4`.
+
+model:
+  base_model: "Qwen/Qwen3-8B"          # swap to "Qwen/Qwen3-4B" for <=12GB GPUs
+  max_seq_length: 4096
+  load_in_4bit: true                    # QLoRA (NF4)
+  dtype: null                            # null = auto-detect (bf16 on Ampere+)
+  enable_thinking: false                 # persona is direct-answer, no <think> scaffolding
+
+lora:
+  r: 16
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: "none"
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  use_gradient_checkpointing: "unsloth"  # Unsloth's optimized long-context checkpointing
+  random_state: 42
+
+data:
+  train_file: "../../data/processed/train.jsonl"
+  val_file: "../../data/processed/val.jsonl"
+  packing: false                         # see docs/02_finetuning_strategy.md — deliberately off
+  train_on_responses_only: true          # mask loss to assistant tokens only
+  instruction_part: "<|im_start|>user\n"
+  response_part: "<|im_start|>assistant\n"
+
+training:
+  output_dir: "./outputs/qwen3-8b-vedaz-qlora"
+  num_train_epochs: 3
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  optim: "adamw_8bit"
+  weight_decay: 0.01
+  max_grad_norm: 0.3
+  bf16: true
+  fp16: false
+  logging_steps: 1
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  early_stopping_patience: 2
+  seed: 42
+  report_to: "none"                      # set to "wandb" and export WANDB_API_KEY to enable
+
+export:
+  merged_fp16_dir: "./outputs/qwen3-8b-vedaz-merged-fp16"
+  adapter_only_dir: "./outputs/qwen3-8b-vedaz-adapter"
+  gguf_dir: "./outputs/qwen3-8b-vedaz-gguf"
+  gguf_quant_methods:
+    - "q4_k_m"     # best default for CPU/edge inference (llama.cpp / Ollama)
+    - "q8_0"       # higher-fidelity fallback

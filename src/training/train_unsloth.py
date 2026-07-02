@@ -1,0 +1,190 @@
+"""
+Production QLoRA fine-tuning script for Qwen3-8B on the Vedaz astrology chat dataset, using
+Unsloth for 4-bit quantized loading, fused LoRA kernels, and Unsloth-optimized gradient
+checkpointing.
+
+Design decisions are documented in ../../docs/02_finetuning_strategy.md — this script is a
+direct implementation of that document's section 5 (training configuration) and should not
+diverge from it without updating the doc.
+
+Requires a CUDA GPU (see docs/02_finetuning_strategy.md section 2 for VRAM sizing). Will not
+run meaningfully on CPU.
+
+Usage:
+    python train_unsloth.py --config training_config.yaml
+    python train_unsloth.py --config training_config.yaml --num_train_epochs 4 --learning_rate 1e-4
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import yaml
+
+
+def load_config(path: str, overrides: dict) -> dict:
+    with open(path, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    # shallow CLI overrides land in the `training` block, the only block users typically
+    # want to tweak per-run without editing the YAML.
+    for k, v in overrides.items():
+        if v is None:
+            continue
+        cfg["training"][k] = v
+    return cfg
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--config", default="training_config.yaml")
+    p.add_argument("--num_train_epochs", type=int, default=None)
+    p.add_argument("--learning_rate", type=float, default=None)
+    p.add_argument("--per_device_train_batch_size", type=int, default=None)
+    p.add_argument("--gradient_accumulation_steps", type=int, default=None)
+    p.add_argument("--output_dir", type=str, default=None)
+    p.add_argument("--report_to", type=str, default=None, help='"none" or "wandb"')
+    return p
+
+
+def main() -> None:
+    args = build_arg_parser().parse_args()
+    overrides = {
+        "num_train_epochs": args.num_train_epochs,
+        "learning_rate": args.learning_rate,
+        "per_device_train_batch_size": args.per_device_train_batch_size,
+        "gradient_accumulation_steps": args.gradient_accumulation_steps,
+        "output_dir": args.output_dir,
+        "report_to": args.report_to,
+    }
+    cfg = load_config(args.config, overrides)
+
+    # Imported lazily so `--help` and config-parsing work without a GPU/Unsloth installed,
+    # which is convenient for CI-linting this script and for reading --help on a laptop.
+    import torch
+    from datasets import load_dataset
+    from transformers import EarlyStoppingCallback
+    from trl import SFTConfig, SFTTrainer
+    from unsloth import FastLanguageModel, is_bfloat16_supported
+    from unsloth.chat_templates import get_chat_template, train_on_responses_only
+
+    m_cfg = cfg["model"]
+    l_cfg = cfg["lora"]
+    d_cfg = cfg["data"]
+    t_cfg = cfg["training"]
+
+    print(f"[1/7] Loading base model in 4-bit: {m_cfg['base_model']}")
+    model, tokenizer = FastLanguageModel.from_pretrained(
+        model_name=m_cfg["base_model"],
+        max_seq_length=m_cfg["max_seq_length"],
+        dtype=m_cfg["dtype"],
+        load_in_4bit=m_cfg["load_in_4bit"],
+    )
+
+    print("[2/7] Attaching Qwen3 chat template")
+    tokenizer = get_chat_template(tokenizer, chat_template="qwen3")
+
+    print(f"[3/7] Wrapping model with LoRA adapters (r={l_cfg['r']}, alpha={l_cfg['lora_alpha']})")
+    model = FastLanguageModel.get_peft_model(
+        model,
+        r=l_cfg["r"],
+        target_modules=l_cfg["target_modules"],
+        lora_alpha=l_cfg["lora_alpha"],
+        lora_dropout=l_cfg["lora_dropout"],
+        bias=l_cfg["bias"],
+        use_gradient_checkpointing=l_cfg["use_gradient_checkpointing"],
+        random_state=l_cfg["random_state"],
+    )
+
+    print("[4/7] Loading and formatting datasets")
+
+    def formatting_func(examples):
+        convos = examples["messages"]
+        texts = [
+            tokenizer.apply_chat_template(
+                convo,
+                tokenize=False,
+                add_generation_prompt=False,
+                enable_thinking=m_cfg["enable_thinking"],
+            )
+            for convo in convos
+        ]
+        return {"text": texts}
+
+    data_files = {"train": d_cfg["train_file"], "validation": d_cfg["val_file"]}
+    dataset = load_dataset("json", data_files=data_files)
+    dataset = dataset.map(formatting_func, batched=True)
+    print(f"    train examples: {len(dataset['train'])} | val examples: {len(dataset['validation'])}")
+
+    print("[5/7] Configuring SFTTrainer")
+    Path(t_cfg["output_dir"]).mkdir(parents=True, exist_ok=True)
+
+    sft_config = SFTConfig(
+        output_dir=t_cfg["output_dir"],
+        num_train_epochs=t_cfg["num_train_epochs"],
+        per_device_train_batch_size=t_cfg["per_device_train_batch_size"],
+        per_device_eval_batch_size=t_cfg["per_device_eval_batch_size"],
+        gradient_accumulation_steps=t_cfg["gradient_accumulation_steps"],
+        learning_rate=t_cfg["learning_rate"],
+        lr_scheduler_type=t_cfg["lr_scheduler_type"],
+        warmup_ratio=t_cfg["warmup_ratio"],
+        optim=t_cfg["optim"],
+        weight_decay=t_cfg["weight_decay"],
+        max_grad_norm=t_cfg["max_grad_norm"],
+        bf16=t_cfg["bf16"] and is_bfloat16_supported(),
+        fp16=not is_bfloat16_supported(),
+        logging_steps=t_cfg["logging_steps"],
+        eval_strategy=t_cfg["eval_strategy"],
+        save_strategy=t_cfg["save_strategy"],
+        save_total_limit=t_cfg["save_total_limit"],
+        load_best_model_at_end=t_cfg["load_best_model_at_end"],
+        metric_for_best_model=t_cfg["metric_for_best_model"],
+        greater_is_better=t_cfg["greater_is_better"],
+        seed=t_cfg["seed"],
+        report_to=t_cfg["report_to"],
+        dataset_text_field="text",
+        max_seq_length=m_cfg["max_seq_length"],
+        packing=d_cfg["packing"],
+    )
+
+    trainer = SFTTrainer(
+        model=model,
+        tokenizer=tokenizer,
+        train_dataset=dataset["train"],
+        eval_dataset=dataset["validation"],
+        args=sft_config,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=t_cfg["early_stopping_patience"])],
+    )
+
+    if d_cfg["train_on_responses_only"]:
+        print("[6/7] Masking loss to assistant-only tokens")
+        trainer = train_on_responses_only(
+            trainer,
+            instruction_part=d_cfg["instruction_part"],
+            response_part=d_cfg["response_part"],
+        )
+
+    print("[7/7] Training")
+    gpu_stats = torch.cuda.get_device_properties(0) if torch.cuda.is_available() else None
+    if gpu_stats:
+        print(f"    GPU: {gpu_stats.name} | Total VRAM: {gpu_stats.total_memory / 1e9:.1f} GB")
+
+    trainer_stats = trainer.train()
+
+    print("\nTraining complete. Metrics:")
+    print(json.dumps(trainer_stats.metrics, indent=2))
+
+    adapter_dir = cfg["export"]["adapter_only_dir"]
+    print(f"\nSaving LoRA adapter + tokenizer to {adapter_dir}")
+    model.save_pretrained(adapter_dir)
+    tokenizer.save_pretrained(adapter_dir)
+
+    metrics_path = Path(t_cfg["output_dir"]) / "final_train_metrics.json"
+    metrics_path.write_text(json.dumps(trainer_stats.metrics, indent=2), encoding="utf-8")
+    print(f"Saved training metrics to {metrics_path}")
+    print("\nNext step: python merge_and_export.py --config training_config.yaml")
+
+
+if __name__ == "__main__":
+    main()

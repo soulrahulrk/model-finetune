@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+outputs/
+eval_outputs/
+*.safetensors
+*.gguf
+.env
+wandb/
