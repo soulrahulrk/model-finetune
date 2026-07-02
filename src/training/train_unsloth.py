@@ -86,6 +86,24 @@ def main() -> None:
     print("[2/7] Attaching Qwen3 chat template")
     tokenizer = get_chat_template(tokenizer, chat_template="qwen3")
 
+    # Some Unsloth/trl/transformers version combinations leave tokenizer.eos_token as an
+    # unsubstituted chat-template placeholder string (e.g. literal "<EOS_TOKEN>") instead of a
+    # real token, which trl's SFTTrainer then rejects with "not found in the vocabulary". Detect
+    # and repair this by falling back to Qwen's real ChatML end-of-turn token before it's used.
+    vocab = tokenizer.get_vocab()
+    if tokenizer.eos_token not in vocab:
+        for candidate in ("<|im_end|>", "<|endoftext|>"):
+            if candidate in vocab:
+                print(f"    Note: tokenizer.eos_token was '{tokenizer.eos_token}' (not in vocab); "
+                      f"resetting to '{candidate}'.")
+                tokenizer.eos_token = candidate
+                break
+        else:
+            raise RuntimeError(
+                f"tokenizer.eos_token '{tokenizer.eos_token}' is not in the vocabulary and no "
+                f"known fallback token (<|im_end|>, <|endoftext|>) was found either."
+            )
+
     print(f"[3/7] Wrapping model with LoRA adapters (r={l_cfg['r']}, alpha={l_cfg['lora_alpha']})")
     model = FastLanguageModel.get_peft_model(
         model,
