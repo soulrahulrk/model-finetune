@@ -91,6 +91,8 @@ def main() -> None:
     # real token, which trl's SFTTrainer then rejects with "not found in the vocabulary". Detect
     # and repair this by falling back to Qwen's real ChatML end-of-turn token before it's used.
     vocab = tokenizer.get_vocab()
+    print(f"    Diagnostic: tokenizer.eos_token={tokenizer.eos_token!r}, "
+          f"in_vocab={tokenizer.eos_token in vocab}, eos_token_id={tokenizer.eos_token_id!r}")
     if tokenizer.eos_token not in vocab:
         for candidate in ("<|im_end|>", "<|endoftext|>"):
             if candidate in vocab:
@@ -103,6 +105,7 @@ def main() -> None:
                 f"tokenizer.eos_token '{tokenizer.eos_token}' is not in the vocabulary and no "
                 f"known fallback token (<|im_end|>, <|endoftext|>) was found either."
             )
+    print(f"    Diagnostic: tokenizer.eos_token AFTER repair check={tokenizer.eos_token!r}")
 
     print(f"[3/7] Wrapping model with LoRA adapters (r={l_cfg['r']}, alpha={l_cfg['lora_alpha']})")
     model = FastLanguageModel.get_peft_model(
@@ -198,6 +201,17 @@ def main() -> None:
     if dropped_fields:
         print(f"    Note: this trl version's SFTConfig doesn't accept {dropped_fields}; "
               f"proceeding without them.")
+    print(f"    Diagnostic: sft_config.eos_token={getattr(sft_config, 'eos_token', '<attr not set>')!r}")
+
+    # Unsloth caches its JIT-generated SFTTrainer/SFTConfig wrapper code on disk and reuses it
+    # across runs to avoid recompiling -- if a previous run generated a broken wrapper (e.g. with
+    # an unsubstituted eos_token placeholder baked in), it can keep being reused even after this
+    # script changes, silently ignoring any fix made above. Force a fresh generation every run.
+    import shutil as _shutil
+    compiled_cache_dir = Path(__file__).parent / "unsloth_compiled_cache"
+    if compiled_cache_dir.exists():
+        print(f"    Clearing stale Unsloth compiled cache at {compiled_cache_dir}")
+        _shutil.rmtree(compiled_cache_dir, ignore_errors=True)
 
     trainer_kwargs = {
         "model": model,
