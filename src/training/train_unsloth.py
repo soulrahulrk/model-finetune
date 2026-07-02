@@ -62,10 +62,11 @@ def main() -> None:
 
     # Imported lazily so `--help` and config-parsing work without a GPU/Unsloth installed,
     # which is convenient for CI-linting this script and for reading --help on a laptop.
+    import re
     import torch
     from datasets import load_dataset
-    from transformers import EarlyStoppingCallback, TrainingArguments
-    from trl import SFTTrainer
+    from transformers import EarlyStoppingCallback
+    from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel, is_bfloat16_supported
     from unsloth.chat_templates import get_chat_template, train_on_responses_only
 
@@ -120,39 +121,65 @@ def main() -> None:
     print("[5/7] Configuring SFTTrainer")
     Path(t_cfg["output_dir"]).mkdir(parents=True, exist_ok=True)
 
-    training_args = TrainingArguments(
-        output_dir=t_cfg["output_dir"],
-        num_train_epochs=t_cfg["num_train_epochs"],
-        per_device_train_batch_size=t_cfg["per_device_train_batch_size"],
-        per_device_eval_batch_size=t_cfg["per_device_eval_batch_size"],
-        gradient_accumulation_steps=t_cfg["gradient_accumulation_steps"],
-        learning_rate=t_cfg["learning_rate"],
-        lr_scheduler_type=t_cfg["lr_scheduler_type"],
-        warmup_ratio=t_cfg["warmup_ratio"],
-        optim=t_cfg["optim"],
-        weight_decay=t_cfg["weight_decay"],
-        max_grad_norm=t_cfg["max_grad_norm"],
-        bf16=t_cfg["bf16"] and is_bfloat16_supported(),
-        fp16=not is_bfloat16_supported(),
-        logging_steps=t_cfg["logging_steps"],
-        eval_strategy=t_cfg["eval_strategy"],
-        save_strategy=t_cfg["save_strategy"],
-        save_total_limit=t_cfg["save_total_limit"],
-        load_best_model_at_end=t_cfg["load_best_model_at_end"],
-        metric_for_best_model=t_cfg["metric_for_best_model"],
-        greater_is_better=t_cfg["greater_is_better"],
-        seed=t_cfg["seed"],
-        report_to=t_cfg["report_to"],
-    )
+    # trl has repeatedly renamed/relocated the SFT-specific fields (max_seq_length -> max_length,
+    # dataset_text_field / packing moving in and out of SFTConfig vs. SFTTrainer kwargs) across
+    # versions. Rather than hard-code one version's field names, build the full desired kwarg set,
+    # try constructing SFTConfig, and on a TypeError naming an unexpected keyword, drop/rename that
+    # one field and retry -- until construction succeeds or we run out of optional fields to drop.
+    sft_config_kwargs = {
+        "output_dir": t_cfg["output_dir"],
+        "num_train_epochs": t_cfg["num_train_epochs"],
+        "per_device_train_batch_size": t_cfg["per_device_train_batch_size"],
+        "per_device_eval_batch_size": t_cfg["per_device_eval_batch_size"],
+        "gradient_accumulation_steps": t_cfg["gradient_accumulation_steps"],
+        "learning_rate": t_cfg["learning_rate"],
+        "lr_scheduler_type": t_cfg["lr_scheduler_type"],
+        "warmup_ratio": t_cfg["warmup_ratio"],
+        "optim": t_cfg["optim"],
+        "weight_decay": t_cfg["weight_decay"],
+        "max_grad_norm": t_cfg["max_grad_norm"],
+        "bf16": t_cfg["bf16"] and is_bfloat16_supported(),
+        "fp16": not is_bfloat16_supported(),
+        "logging_steps": t_cfg["logging_steps"],
+        "eval_strategy": t_cfg["eval_strategy"],
+        "save_strategy": t_cfg["save_strategy"],
+        "save_total_limit": t_cfg["save_total_limit"],
+        "load_best_model_at_end": t_cfg["load_best_model_at_end"],
+        "metric_for_best_model": t_cfg["metric_for_best_model"],
+        "greater_is_better": t_cfg["greater_is_better"],
+        "seed": t_cfg["seed"],
+        "report_to": t_cfg["report_to"],
+        "max_seq_length": m_cfg["max_seq_length"],
+        "dataset_text_field": "text",
+        "packing": d_cfg["packing"],
+    }
+
+    def _build_sft_config(kwargs):
+        kwargs = dict(kwargs)
+        dropped = []
+        while True:
+            try:
+                return SFTConfig(**kwargs), dropped
+            except TypeError as e:
+                m = re.search(r"unexpected keyword argument '(\w+)'", str(e))
+                if not m or m.group(1) not in kwargs:
+                    raise
+                bad_key = m.group(1)
+                del kwargs[bad_key]
+                dropped.append(bad_key)
+                if bad_key == "max_seq_length" and "max_length" not in kwargs:
+                    kwargs["max_length"] = m_cfg["max_seq_length"]
+
+    sft_config, dropped_fields = _build_sft_config(sft_config_kwargs)
+    if dropped_fields:
+        print(f"    Note: this trl version's SFTConfig doesn't accept {dropped_fields}; "
+              f"proceeding without them.")
 
     trainer_kwargs = {
         "model": model,
         "train_dataset": dataset["train"],
         "eval_dataset": dataset["validation"],
-        "args": training_args,
-        "dataset_text_field": "text",
-        "max_seq_length": m_cfg["max_seq_length"],
-        "packing": d_cfg["packing"],
+        "args": sft_config,
         "callbacks": [EarlyStoppingCallback(early_stopping_patience=t_cfg["early_stopping_patience"])],
     }
 
