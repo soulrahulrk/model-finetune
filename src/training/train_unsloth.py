@@ -74,7 +74,7 @@ def main() -> None:
     import re
     import torch
     from unsloth import FastLanguageModel, is_bfloat16_supported
-    from unsloth.chat_templates import get_chat_template, train_on_responses_only
+    from unsloth.chat_templates import train_on_responses_only
     from datasets import load_dataset
     from transformers import EarlyStoppingCallback
     from trl import SFTConfig, SFTTrainer
@@ -92,8 +92,16 @@ def main() -> None:
         load_in_4bit=m_cfg["load_in_4bit"],
     )
 
-    print("[2/7] Attaching Qwen3 chat template")
-    tokenizer = get_chat_template(tokenizer, chat_template="qwen3")
+    # Deliberately NOT calling Unsloth's get_chat_template(tokenizer, chat_template="qwen3")
+    # here. Qwen3's tokenizer already ships its own correct, native chat template (visible in
+    # the "chat_template.jinja" file downloaded alongside the model) with a valid eos_token
+    # ("<|im_end|>", confirmed present in the vocabulary). get_chat_template() exists to inject a
+    # template for models that DON'T ship one -- calling it on a model that already has one is
+    # what was overwriting eos_token with an unresolved placeholder ("<EOS_TOKEN>"), a known
+    # Unsloth issue (https://github.com/unslothai/unsloth/issues/2797) that persisted even with
+    # the correct unsloth-before-trl import order. Unsloth's own official reference examples for
+    # SFTTrainer/SFTConfig do not call get_chat_template either.
+    print("[2/7] Using tokenizer's native Qwen3 chat template (skipping get_chat_template)")
 
     # Some Unsloth/trl/transformers version combinations leave tokenizer.eos_token as an
     # unsubstituted chat-template placeholder string (e.g. literal "<EOS_TOKEN>") instead of a
