@@ -62,13 +62,22 @@ def main() -> None:
 
     # Imported lazily so `--help` and config-parsing work without a GPU/Unsloth installed,
     # which is convenient for CI-linting this script and for reading --help on a laptop.
+    #
+    # IMPORT ORDER MATTERS: unsloth must be imported before trl/transformers/peft. Unsloth's
+    # patching (which fixes up chat-template EOS/PAD token wiring) only applies correctly if it
+    # runs before trl's classes are touched -- importing trl first is a documented Unsloth bug
+    # (https://github.com/unslothai/unsloth/issues/2797) that causes SFTConfig's eos_token to be
+    # silently overwritten with the literal unresolved placeholder "<EOS_TOKEN>", which then
+    # fails trl's vocabulary check. This exact ordering is also what Unsloth's own startup
+    # warning has been telling us on every run ("Unsloth should be imported before [trl,
+    # transformers, peft]") -- it's not just a performance tip, it's required for correctness.
     import re
     import torch
+    from unsloth import FastLanguageModel, is_bfloat16_supported
+    from unsloth.chat_templates import get_chat_template, train_on_responses_only
     from datasets import load_dataset
     from transformers import EarlyStoppingCallback
     from trl import SFTConfig, SFTTrainer
-    from unsloth import FastLanguageModel, is_bfloat16_supported
-    from unsloth.chat_templates import get_chat_template, train_on_responses_only
 
     m_cfg = cfg["model"]
     l_cfg = cfg["lora"]
