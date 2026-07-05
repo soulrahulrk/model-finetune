@@ -1,0 +1,199 @@
+Training cell output captured at 2026-07-03 21:31:20
+================================================================================
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+[1/7] Loading base model in 4-bit: Qwen/Qwen3-8B
+==((====))==  Unsloth 2026.6.9: Fast Qwen3 patching. Transformers: 5.5.0.
+   \\   /|    Tesla T4. Num GPUs = 1. Max memory: 14.563 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.10.0+cu128. CUDA: 7.5. CUDA Toolkit: 12.8. Triton: 3.6.0
+\        /    Bfloat16 = FALSE. FA [Xformers = 0.0.35. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+model.safetensors.index.json: 100% 144k/144k [00:00<00:00, 182MB/s]
+Downloading (incomplete total...): 0.00B [00:00, ?B/s]
+Downloading (incomplete total...): 100% 7.48G/7.48G [00:46<00:00, 247MB/s] 
+Fetching 2 files: 100% 2/2 [00:46<00:00, 23.34s/it][A
+Download complete: 100% 7.48G/7.48G [00:46<00:00, 160MB/s]                
+Loading weights: 100% 399/399 [00:29<00:00, 13.54it/s]
+generation_config.json: 100% 237/237 [00:00<00:00, 1.51MB/s]
+config.json: 100% 1.53k/1.53k [00:00<00:00, 5.71MB/s]
+tokenizer_config.json: 100% 10.5k/10.5k [00:00<00:00, 29.6MB/s]
+vocab.json: 100% 2.78M/2.78M [00:00<00:00, 98.9MB/s]
+merges.txt: 100% 1.67M/1.67M [00:00<00:00, 121MB/s]
+tokenizer.json: 100% 11.4M/11.4M [00:01<00:00, 8.37MB/s]
+added_tokens.json: 100% 707/707 [00:00<00:00, 3.23MB/s]
+special_tokens_map.json: 100% 614/614 [00:00<00:00, 2.21MB/s]
+chat_template.jinja: 100% 4.67k/4.67k [00:00<00:00, 13.8MB/s]
+unsloth/qwen3-8b-unsloth-bnb-4bit does not have a padding token! Will use pad_token = <|PAD_TOKEN|>.
+[2/7] Using tokenizer's native Qwen3 chat template (skipping get_chat_template)
+    Diagnostic: tokenizer.eos_token='<|im_end|>', in_vocab=True, eos_token_id=151645
+    Diagnostic: tokenizer.eos_token AFTER repair check='<|im_end|>'
+[3/7] Wrapping model with LoRA adapters (r=16, alpha=16)
+Unsloth: Dropout = 0 is supported for fast patching. You are using dropout = 0.05.
+Unsloth will patch all other layers, except LoRA matrices, causing a performance hit.
+Unsloth 2026.6.9 patched 36 layers with 0 QKV layers, 0 O layers and 0 MLP layers.
+[4/7] Loading and formatting datasets
+Generating train split: 139 examples [00:00, 3004.72 examples/s]
+Generating validation split: 16 examples [00:00, 4399.72 examples/s]
+Map: 100% 139/139 [00:00<00:00, 3013.96 examples/s]
+Map: 100% 16/16 [00:00<00:00, 2111.54 examples/s]
+    train examples: 139 | val examples: 16
+[5/7] Configuring SFTTrainer
+warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+    Diagnostic: sft_config.eos_token='<|im_end|>'
+    Clearing stale Unsloth compiled cache at /content/model-finetune/src/training/unsloth_compiled_cache
+Unsloth: Tokenizing ["text"] (num_proc=6): 100% 139/139 [00:14<00:00,  9.35 examples/s]
+Unsloth: Tokenizing ["text"] (num_proc=6): 100% 16/16 [00:14<00:00,  1.12 examples/s]
+🦥 Unsloth: Padding-free auto-enabled, enabling faster training.
+[6/7] Masking loss to assistant-only tokens
+Map (num_proc=6): 100% 139/139 [00:00<00:00, 146.83 examples/s]
+Filter (num_proc=6): 100% 139/139 [00:00<00:00, 143.90 examples/s]
+Map (num_proc=6): 100% 16/16 [00:00<00:00, 21.91 examples/s]
+Filter (num_proc=6): 100% 16/16 [00:00<00:00, 32.55 examples/s]
+[7/7] Training
+    GPU: Tesla T4 | Total VRAM: 15.6 GB
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None}.
+==((====))==  Unsloth - 2x faster free finetuning | Num GPUs used = 1
+   \\   /|    Num examples = 139 | Num Epochs = 3 | Total steps = 54
+O^O/ \_/ \    Batch size per device = 2 | Gradient accumulation steps = 4
+\        /    Data Parallel GPUs = 1 | Total batch size (2 x 4 x 1) = 8
+ "-____-"     Trainable parameters = 43,646,976 of 8,234,382,336 (0.53% trained)
+  0% 0/54 [00:00<?, ?it/s]`use_return_dict` is deprecated! Use `return_dict` instead!
+Unsloth: Will smartly offload gradients to save VRAM!
+Unsloth: Double buffering enabled (parallel H2D + compute) for backward pass.
+{'loss': '2.009', 'grad_norm': '0.7635', 'learning_rate': '0', 'epoch': '0.05714'}
+{'loss': '3.329', 'grad_norm': '1.162', 'learning_rate': '6.667e-05', 'epoch': '0.1143'}
+{'loss': '1.972', 'grad_norm': '0.8259', 'learning_rate': '0.0001333', 'epoch': '0.1714'}
+{'loss': '2.061', 'grad_norm': '0.9145', 'learning_rate': '0.0002', 'epoch': '0.2286'}
+{'loss': '1.918', 'grad_norm': '0.6879', 'learning_rate': '0.0001992', 'epoch': '0.3429'}
+{'loss': '1.529', 'grad_norm': '0.4162', 'learning_rate': '0.0001983', 'epoch': '0.4'}
+{'loss': '2.284', 'grad_norm': '0.4494', 'learning_rate': '0.000197', 'epoch': '0.4571'}
+{'loss': '1.016', 'grad_norm': '0.1698', 'learning_rate': '0.0001953', 'epoch': '0.5143'}
+{'loss': '1.628', 'grad_norm': '0.4063', 'learning_rate': '0.0001932', 'epoch': '0.5714'}
+{'loss': '1.908', 'grad_norm': '0.4461', 'learning_rate': '0.0001908', 'epoch': '0.6286'}
+{'loss': '1.303', 'grad_norm': '0.2592', 'learning_rate': '0.0001881', 'epoch': '0.6857'}
+{'loss': '1.02', 'grad_norm': '0.2282', 'learning_rate': '0.000185', 'epoch': '0.7429'}
+{'loss': '1.633', 'grad_norm': '0.331', 'learning_rate': '0.0001816', 'epoch': '0.8'}
+{'loss': '2.016', 'grad_norm': '0.6884', 'learning_rate': '0.0001779', 'epoch': '0.8571'}
+{'loss': '1.488', 'grad_norm': '0.4176', 'learning_rate': '0.0001739', 'epoch': '0.9143'}
+{'loss': '1.032', 'grad_norm': '0.216', 'learning_rate': '0.0001696', 'epoch': '0.9714'}
+{'loss': '2.05', 'grad_norm': '0.7873', 'learning_rate': '0.0001651', 'epoch': '1'}
+ 33% 18/54 [05:58<09:30, 15.84s/it]/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:71: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:281: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:172: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:202: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:254: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+
+  0% 0/8 [00:00<?, ?it/s][A/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:71: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:281: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:172: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:202: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:254: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+
+ 25% 2/8 [00:00<00:02,  2.09it/s][A
+ 38% 3/8 [00:02<00:04,  1.02it/s][A
+ 50% 4/8 [00:03<00:03,  1.02it/s][A
+ 62% 5/8 [00:04<00:02,  1.10it/s][A
+ 75% 6/8 [00:05<00:01,  1.15it/s][A
+ 88% 7/8 [00:08<00:01,  1.67s/it][A
+100% 8/8 [00:12<00:00,  2.40s/it][A
+{'eval_loss': '1.666', 'eval_runtime': '14.91', 'eval_samples_per_second': '1.073', 'eval_steps_per_second': '0.537', 'epoch': '1'}
+
+ 33% 18/54 [06:12<09:30, 15.84s/it]A
+                                 [AUnsloth: Restored added_tokens_decoder metadata in ./outputs/qwen3-8b-vedaz-qlora/checkpoint-18/tokenizer_config.json.
+{'loss': '1.617', 'grad_norm': '0.3509', 'learning_rate': '0.0001603', 'epoch': '1.057'}
+{'loss': '0.961', 'grad_norm': '0.2312', 'learning_rate': '0.0001552', 'epoch': '1.114'}
+{'loss': '1.424', 'grad_norm': '0.3634', 'learning_rate': '0.00015', 'epoch': '1.171'}
+{'loss': '1.321', 'grad_norm': '0.2992', 'learning_rate': '0.0001446', 'epoch': '1.229'}
+{'loss': '1.138', 'grad_norm': '0.2559', 'learning_rate': '0.000139', 'epoch': '1.286'}
+{'loss': '1.132', 'grad_norm': '0.3093', 'learning_rate': '0.0001332', 'epoch': '1.343'}
+{'loss': '1.746', 'grad_norm': '0.3975', 'learning_rate': '0.0001274', 'epoch': '1.4'}
+{'loss': '0.9908', 'grad_norm': '0.2782', 'learning_rate': '0.0001214', 'epoch': '1.457'}
+{'loss': '1.003', 'grad_norm': '0.2904', 'learning_rate': '0.0001153', 'epoch': '1.514'}
+{'loss': '1.481', 'grad_norm': '0.5057', 'learning_rate': '9.692e-05', 'epoch': '1.686'}
+{'loss': '1.048', 'grad_norm': '0.3514', 'learning_rate': '9.077e-05', 'epoch': '1.743'}
+{'loss': '1.101', 'grad_norm': '0.3841', 'learning_rate': '8.466e-05', 'epoch': '1.8'}
+{'loss': '1.554', 'grad_norm': '0.4998', 'learning_rate': '7.861e-05', 'epoch': '1.857'}
+{'loss': '1.474', 'grad_norm': '0.4358', 'learning_rate': '7.263e-05', 'epoch': '1.914'}
+{'loss': '0.7638', 'grad_norm': '0.2935', 'learning_rate': '6.676e-05', 'epoch': '1.971'}
+{'loss': '1.881', 'grad_norm': '1.098', 'learning_rate': '6.102e-05', 'epoch': '2'}
+ 67% 36/54 [12:10<04:35, 15.29s/it]/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:71: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:281: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:172: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:202: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+/usr/local/lib/python3.12/dist-packages/transformers/modeling_attn_mask_utils.py:254: FutureWarning: The attention mask API under `transformers.modeling_attn_mask_utils` (`AttentionMaskConverter`) is deprecated and will be removed in Transformers v5.10. Please use the new API in `transformers.masking_utils`.
+  warnings.warn(DEPRECATION_MESSAGE, FutureWarning)
+
+  0% 0/8 [00:00<?, ?it/s][A
+ 25% 2/8 [00:01<00:03,  1.65it/s][A
+ 38% 3/8 [00:02<00:05,  1.09s/it][A
+ 50% 4/8 [00:03<00:04,  1.06s/it][A
+ 62% 5/8 [00:04<00:02,  1.04it/s][A
+ 75% 6/8 [00:05<00:01,  1.10it/s][A
+ 88% 7/8 [00:08<00:01,  1.71s/it][A
+100% 8/8 [00:12<00:00,  2.42s/it][A
+{'eval_loss': '1.517', 'eval_runtime': '14.6', 'eval_samples_per_second': '1.096', 'eval_steps_per_second': '0.548', 'epoch': '2'}
+
+ 67% 36/54 [12:25<04:35, 15.29s/it]A
+                                 [AUnsloth: Restored added_tokens_decoder metadata in ./outputs/qwen3-8b-vedaz-qlora/checkpoint-36/tokenizer_config.json.
+{'loss': '0.9312', 'grad_norm': '0.3189', 'learning_rate': '5.543e-05', 'epoch': '2.057'}
+{'loss': '0.9738', 'grad_norm': '0.4132', 'learning_rate': '5e-05', 'epoch': '2.114'}
+{'loss': '1.043', 'grad_norm': '0.3816', 'learning_rate': '4.476e-05', 'epoch': '2.171'}
+{'loss': '0.9006', 'grad_norm': '0.2914', 'learning_rate': '3.974e-05', 'epoch': '2.229'}
+{'loss': '0.8859', 'grad_norm': '0.2635', 'learning_rate': '3.494e-05', 'epoch': '2.286'}
+{'loss': '1.211', 'grad_norm': '0.4937', 'learning_rate': '3.039e-05', 'epoch': '2.343'}
+{'loss': '1.118', 'grad_norm': '0.4256', 'learning_rate': '2.61e-05', 'epoch': '2.4'}
+{'loss': '0.8495', 'grad_norm': '0.3601', 'learning_rate': '2.209e-05', 'epoch': '2.457'}
+{'loss': '0.9863', 'grad_norm': '0.4036', 'learning_rate': '1.838e-05', 'epoch': '2.514'}
+{'loss': '1.485', 'grad_norm': '0.4791', 'learning_rate': '1.19e-05', 'epoch': '2.629'}
+{'loss': '0.7915', 'grad_norm': '0.3575', 'learning_rate': '9.153e-06', 'epoch': '2.686'}
+{'loss': '1.065', 'grad_norm': '0.387', 'learning_rate': '6.753e-06', 'epoch': '2.743'}
+{'loss': '0.9756', 'grad_norm': '0.3952', 'learning_rate': '4.706e-06', 'epoch': '2.8'}
+{'loss': '1.568', 'grad_norm': '0.4776', 'learning_rate': '3.02e-06', 'epoch': '2.857'}
+{'loss': '0.9568', 'grad_norm': '0.3932', 'learning_rate': '1.703e-06', 'epoch': '2.914'}
+{'loss': '1.513', 'grad_norm': '0.5048', 'learning_rate': '7.579e-07', 'epoch': '2.971'}
+ 98% 53/54 [18:06<00:20, 20.33s/it]
+  0% 0/8 [00:00<?, ?it/s][A
+ 25% 2/8 [00:01<00:03,  1.67it/s][A
+ 38% 3/8 [00:02<00:05,  1.08s/it][A
+ 50% 4/8 [00:03<00:04,  1.04s/it][A
+ 62% 5/8 [00:04<00:02,  1.05it/s][A
+ 75% 6/8 [00:05<00:01,  1.11it/s][A
+ 88% 7/8 [00:08<00:01,  1.70s/it][A
+100% 8/8 [00:12<00:00,  2.41s/it][A
+{'eval_loss': '1.502', 'eval_runtime': '14.49', 'eval_samples_per_second': '1.105', 'eval_steps_per_second': '0.552', 'epoch': '3'}
+
+100% 54/54 [18:36<00:00, 18.89s/it]A
+                                 [AUnsloth: Restored added_tokens_decoder metadata in ./outputs/qwen3-8b-vedaz-qlora/checkpoint-54/tokenizer_config.json.
+{'train_runtime': '1122', 'train_samples_per_second': '0.372', 'train_steps_per_second': '0.048', 'train_loss': '1.403', 'epoch': '3'}
+100% 54/54 [18:42<00:00, 20.78s/it]
+
+Training complete. Metrics:
+{
+  "train_runtime": 1122.0314,
+  "train_samples_per_second": 0.372,
+  "train_steps_per_second": 0.048,
+  "total_flos": 1.26973602597888e+16,
+  "train_loss": 1.4034659597608778,
+  "epoch": 3.0
+}
+
+Saving LoRA adapter + tokenizer to ./outputs/qwen3-8b-vedaz-adapter
+Unsloth: Restored added_tokens_decoder metadata in ./outputs/qwen3-8b-vedaz-adapter/tokenizer_config.json.
+Saved training metrics to outputs/qwen3-8b-vedaz-qlora/final_train_metrics.json
+
+Next step: python merge_and_export.py --config training_config.yaml

@@ -8,3 +8,6 @@ eval_outputs/
 *.gguf
 .env
 wandb/
+# Unsloth JIT-generated trainer wrappers (regenerated every run; not source)
+unsloth_compiled_cache/
+src/training/unsloth_compiled_cache/

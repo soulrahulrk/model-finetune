@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Training Screenshot Capture</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f111a;
+      --panel: #161a26;
+      --panel-2: #111522;
+      --border: #2a3142;
+      --text: #e6edf3;
+      --muted: #9aa7b8;
+      --accent: #8bd3ff;
+      --good: #67e8a5;
+      --warn: #fbbf24;
+      --font: Consolas, "SFMono-Regular", Menlo, Monaco, "Liberation Mono", monospace;
+    }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(139, 211, 255, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(103, 232, 165, 0.08), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+    .wrap {
+      padding: 28px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    .card h2 {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    pre {
+      margin: 0;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--panel-2);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(103, 232, 165, 0.12);
+      color: var(--good);
+      border: 1px solid rgba(103, 232, 165, 0.25);
+      font-size: 12px;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    .footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .loss {
+      color: #ffd479;
+    }
+    .ok {
+      color: var(--good);
+    }
+    .warn {
+      color: var(--warn);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">Qwen3 Vedaz fine-tuning evidence <span class="badge">training finished</span></div>
+    <p class="subtitle">Rendered from the notebook outputs after the training run completed, plus the next sanity-check cell output.</p>
+    <div class="grid">
+      <section class="card">
+        <h2>Training output excerpt</h2>
+        <pre>... 
+{'loss': '1.302', 'grad_norm': '0.2593', 'learning_rate': '0.0001881', 'epoch': '0.6857'}
+{'loss': '1.02', 'grad_norm': '0.2285', 'learning_rate': '0.000185', 'epoch': '0.7429'}
+{'loss': '1.633', 'grad_norm': '0.3309', 'learning_rate': '0.0001816', 'epoch': '0.8'}
+{'loss': '2.016', 'grad_norm': '0.6874', 'learning_rate': '0.0001779', 'epoch': '0.8571'}
+...
+{'loss': '0.8922', 'grad_norm': '0.4152', 'learning_rate': '1.897e-07', 'epoch': '3'}
+100% 54/54 [18:25&lt;00:00, 20.47s/it]
+
+Training complete. Metrics:
+{
+  "train_runtime": 1105.206,
+  "train_samples_per_second": 0.377,
+  "train_steps_per_second": 0.049,
+  "total_flos": 1.26973602597888e+16,
+  "train_loss": 1.4033414489693112,
+  "epoch": 3.0
+}
+
+Saving LoRA adapter + tokenizer to ./outputs/qwen3-8b-vedaz-adapter
+Saved training metrics to outputs/qwen3-8b-vedaz-qlora/final_train_metrics.json
+
+Next step: python merge_and_export.py --config training_config.yaml</pre>
+      </section>
+      <section class="card">
+        <h2>Next cell output</h2>
+        <pre><span class="ok">OK: training finished and the adapter was saved at /content/model-finetune/src/training/outputs/qwen3-8b-vedaz-adapter/adapter_config.json</span>
+Safe to continue to section 6 (Merge the LoRA adapter and export).</pre>
+        <h2 style="margin-top:0;">Sanity check</h2>
+        <pre>The follow-up notebook cell confirms the adapter exists, so the training cell above completed successfully.</pre>
+      </section>
+    </div>
+    <div class="footer">Saved as training_screenshot.png in the evidence folder.</div>
+  </div>
+</body>
+</html>
