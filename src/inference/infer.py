@@ -38,12 +38,17 @@ DEFAULT_SYSTEM_PROMPT = (
 )
 
 
-def load_model(model_path: str, max_seq_length: int = 4096):
+def load_model(model_path: str, max_seq_length: int = 4096, load_in_4bit: bool = True):
     try:
         from unsloth import FastLanguageModel
 
+        # load_in_4bit=True (default) loads the NF4-quantized base (~5-6GB resident) so an 8B
+        # model fits comfortably on a 16GB T4 for inference -- the same reason it fits for
+        # training. load_in_4bit=False pulls the full fp16 base (~16GB) which barely fits a T4
+        # and tends to OOM-crash once generation allocates a KV cache; only use it on a GPU with
+        # real headroom (A100/L4/24GB+).
         model, tokenizer = FastLanguageModel.from_pretrained(
-            model_name=model_path, max_seq_length=max_seq_length, load_in_4bit=False
+            model_name=model_path, max_seq_length=max_seq_length, load_in_4bit=load_in_4bit
         )
         FastLanguageModel.for_inference(model)
         return model, tokenizer, "unsloth"
@@ -152,9 +157,17 @@ def main() -> None:
     ap.add_argument("--interactive", action="store_true")
     ap.add_argument("--batch-in", default=None, help="JSONL input for batch mode")
     ap.add_argument("--batch-out", default=None, help="JSONL output for batch mode")
+    ap.add_argument(
+        "--no-4bit",
+        action="store_true",
+        help="Load the base model in full fp16 instead of 4-bit. Only use on a 24GB+ GPU; "
+        "on a 16GB T4 this will likely OOM. Default is 4-bit (fits a T4).",
+    )
     args = ap.parse_args()
 
-    model, tokenizer, backend = load_model(args.model, args.max_seq_length)
+    model, tokenizer, backend = load_model(
+        args.model, args.max_seq_length, load_in_4bit=not args.no_4bit
+    )
     print(f"Loaded model via backend: {backend}")
 
     if args.batch_in:
